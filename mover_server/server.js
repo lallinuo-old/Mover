@@ -8,9 +8,9 @@ io.sockets.on('connection', function (socket) {
 	var player = {x: 20, y: 20, color: get_random_color(), guid : generateUUID()};
 	players[player.guid] = player;
 	socket.set("guid", player.guid);
-	socket.emit("you",player);
 	socket.emit('players', players);
 	socket.broadcast.emit("players",players);
+	socket.emit("you",player);
 
 	socket.on("update", function(data){
 		console.log("we got some updates");
