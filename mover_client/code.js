@@ -1,6 +1,7 @@
 var paper;
 var players ={};
 var myId; 
+var changes = false;
 $(document).ready(function(){
 
 	paper = Raphael(0, 0, $(window).width(), $(window).height());
@@ -8,16 +9,18 @@ $(document).ready(function(){
 	background.attr("fill", "#000");
 
 	window.setInterval(function(){
-		if(myId){
-			console.log(getPlayerInfoJSON());
+		if(myId && changes){
+		
 			socket.emit("update",getPlayerInfoJSON());
+			changes = false;
+		
 		}
 	},100);
 
 
 });
 
-var socket = io.connect("http://localhost:8000");
+var socket = io.connect("http://80.222.223.155:3000");
 
 socket.on("players",function(playerlist){
 
@@ -37,6 +40,21 @@ socket.on("players",function(playerlist){
 	});
 
 })
+
+socket.on("playerDisconnect",function(data){
+	players[data].attr("fill","black");
+	delete players[data];
+})
+socket.on("updates",function(data){
+
+	console.log(data);
+	$.each(data,function(){
+		if(this.guid != myId){
+			players[this.guid].attr({"x": this.x, "y": this.y});
+		}
+	})
+
+});
 
 
 
@@ -61,6 +79,7 @@ $(window).keydown(function(e){
 	if(e.keyCode  == 40){
 		players[myId].attr("y",players[myId].attr("y")+5);
 	}
+	changes = true;
 });
 
 function getPlayerInfoJSON(){
