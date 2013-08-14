@@ -1,21 +1,18 @@
 var paper;
 var players ={};
 var myId; 
-var changes = false;
+var lastUpdate = new Date().getTime();
+var background;
+var crosshair;
+var crosshairX;
+var crosshairY;
+
+
 $(document).ready(function(){
-
+	changes = true;
 	paper = Raphael(0, 0, $(window).width(), $(window).height());
-	var background = paper.rect(0,0,10000,10000)
+	background = paper.rect(0,0,10000,10000)
 	background.attr("fill", "#000");
-
-	window.setInterval(function(){
-		if(myId && changes){
-		
-			socket.emit("update",getPlayerInfoJSON());
-			changes = false;
-		
-		}
-	},100);
 
 
 });
@@ -47,7 +44,6 @@ socket.on("playerDisconnect",function(data){
 })
 socket.on("updates",function(data){
 
-	console.log(data);
 	$.each(data,function(){
 		if(this.guid != myId){
 			players[this.guid].attr({"x": this.x, "y": this.y});
@@ -57,30 +53,90 @@ socket.on("updates",function(data){
 });
 
 
-
+  
 
 
 socket.on("you", function(player){
 	myId = player.guid;
+	createCrosshair();
+
 });
+function getX(){
+	return players[myId].attr("x");
+
+}
+
+function getY(){
+	return players[myId].attr("y");
+}
+
+function createCrosshair(){
+	crosshair = paper.path();
+	crosshair.attr("stroke", "#fff");
+	background.mousemove(function(event){
+		crosshairX= event.pageX;
+		crosshairY = event.pageY;
+		var newPath =["M", getX()+5, getY()+5, "L", crosshairX,crosshairY];
+		crosshair.attr("path",newPath);
+	});	
+};
+
+function updateCrosshairStart(startX,startY){
+
+	var newPath = ["M",getX()+5, getY()+5, "L", crosshairX,crosshairY];
+	crosshair.attr("path",newPath);
+}
 
 
+//Moving
 $(window).keydown(function(e){
-
+	
+	
 	if(e.keyCode == 37){
-		players[myId].attr("x",players[myId].attr("x")-5);
+		players[myId].attr("x",players[myId].attr("x")-3);
 	}
 	if(e.keyCode  == 38){
-		players[myId].attr("y",players[myId].attr("y")-5);
+		var changes = calcDirection();
+	
+		players[myId].attr("y",players[myId].attr("y")+changes["y"]);
+		players[myId].attr("x",players[myId].attr("x")+changes["x"]);
 	}
 	if(e.keyCode  == 39){
-		players[myId].attr("x",players[myId].attr("x")+5);
+		players[myId].attr("x",players[myId].attr("x")+3);
+	
 	}
 	if(e.keyCode  == 40){
-		players[myId].attr("y",players[myId].attr("y")+5);
+		
 	}
-	changes = true;
+	updateCrosshairStart();
+
+	if(new Date().getTime() - lastUpdate > 100){
+
+		socket.emit("update",getPlayerInfoJSON());
+		lastUpdate = new Date().getTime();
+	
+	}
+
+
 });
+
+function calcDirection(){
+	var deltaX = getX()-crosshairX;
+	var deltaY = getY()-crosshairY;
+
+	var angle = Math.atan(deltaY/deltaX);
+
+	 var x = Math.cos(angle) * 3;
+	 var y = Math.sin(angle) * 3;
+		
+	 if(crosshairX <getX()){
+	 	x=x*-1;
+	 	y=y*-1;
+	 }
+	 console.log("X: "+x+" Y: "+y);
+	 return {"y" : y, "x": x};
+
+}
 
 function getPlayerInfoJSON(){
 	return {x : players[myId].attr("x"), y: players[myId].attr("y"), color: players[myId].color, guid : players[myId].guid};

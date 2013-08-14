@@ -5,7 +5,7 @@ var _ = require("underscore");
 
 
 io.sockets.on('connection', function (socket) {
-	var player = {x: 20, y: 20, color: get_random_color(), guid : generateUUID()};
+	var player = {x: 100, y: 100, color: get_random_color(), guid : generateUUID()};
 	players[player.guid] = player;
 	socket.set("guid", player.guid);
 	socket.emit('players', players);
@@ -40,12 +40,8 @@ io.sockets.on('connection', function (socket) {
 
 
 function get_random_color() {
-	var letters = '0123456789ABCDEF'.split('');
-	var color = '#';
-	for (var i = 0; i < 6; i++ ) {
-		color += letters[Math.round(Math.random() * 15)];
-	}
-	return color;
+
+	return "#"+((1<<24)*Math.random()|0).toString(16);
 }
 
 function generateUUID(){
