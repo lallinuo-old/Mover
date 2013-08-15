@@ -47,7 +47,8 @@ socket.on("updates",function(data){
 	$.each(data,function(){
 		if(this.guid != myId){
 			if(players[this.guid]){
-				players[this.guid].attr({"x": this.x, "y": this.y});
+			//	players[this.guid].attr({"x": this.x, "y": this.y});
+			players[this.guid].animate({"x": this.x, "y": this.y},100);
 			}else{
 				players[this.guid] = paper.rect(this.x,this.y,10,10);
 				players[this.guid].attr("fill",this.color);
