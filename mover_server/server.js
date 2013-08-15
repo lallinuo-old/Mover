@@ -29,8 +29,8 @@ io.sockets.on('connection', function (socket) {
 	setInterval(function(){
 		
 		if(_.size(updates) > 0){
-			socket.emit("updates", players);
-			socket.broadcast.emit("updates", players);
+			socket.emit("updates", updates);
+			socket.broadcast.emit("updates", updates);
 			console.log("changes sent");
 			updates= {};
 		}

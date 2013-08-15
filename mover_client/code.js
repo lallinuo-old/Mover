@@ -23,14 +23,14 @@ socket.on("players",function(playerlist){
 
 	$.each(playerlist,function(data){
 		if(!players[this.guid]){
-		
+			
 			players[this.guid] = paper.rect(this.x,this.y,10,10);
 			players[this.guid].attr("fill",this.color);
 			players[this.guid].color = this.color;
 			players[this.guid].guid = this.guid;
 		}else{
 			if(this.guid != myId){
-	
+				
 				players[this.guid].attr({"x": this.x, "y": this.y});
 			}
 		}
@@ -46,14 +46,21 @@ socket.on("updates",function(data){
 
 	$.each(data,function(){
 		if(this.guid != myId){
-			players[this.guid].attr({"x": this.x, "y": this.y});
+			if(players[this.guid]){
+				players[this.guid].attr({"x": this.x, "y": this.y});
+			}else{
+				players[this.guid] = paper.rect(this.x,this.y,10,10);
+				players[this.guid].attr("fill",this.color);
+				players[this.guid].color = this.color;
+				players[this.guid].guid = this.guid;
+			}
 		}
 	})
 
 });
 
 
-  
+
 
 
 socket.on("you", function(player){
@@ -97,13 +104,13 @@ $(window).keydown(function(e){
 	}
 	if(e.keyCode  == 38){
 		var changes = calcDirection();
-	
+		
 		players[myId].attr("y",players[myId].attr("y")+changes["y"]);
 		players[myId].attr("x",players[myId].attr("x")+changes["x"]);
 	}
 	if(e.keyCode  == 39){
 		players[myId].attr("x",players[myId].attr("x")+3);
-	
+		
 	}
 	if(e.keyCode  == 40){
 		
@@ -114,7 +121,7 @@ $(window).keydown(function(e){
 
 		socket.emit("update",getPlayerInfoJSON());
 		lastUpdate = new Date().getTime();
-	
+		
 	}
 
 
@@ -126,15 +133,15 @@ function calcDirection(){
 
 	var angle = Math.atan(deltaY/deltaX);
 
-	 var x = Math.cos(angle) * 3;
-	 var y = Math.sin(angle) * 3;
-		
-	 if(crosshairX <getX()){
-	 	x=x*-1;
-	 	y=y*-1;
-	 }
-	 console.log("X: "+x+" Y: "+y);
-	 return {"y" : y, "x": x};
+	var x = Math.cos(angle) * 3;
+	var y = Math.sin(angle) * 3;
+	
+	if(crosshairX <getX()){
+		x=x*-1;
+		y=y*-1;
+	}
+	console.log("X: "+x+" Y: "+y);
+	return {"y" : y, "x": x};
 
 }
 
