@@ -114,7 +114,10 @@ $(window).keydown(function(e){
 		
 	}
 	if(e.keyCode  == 40){
+		var changes = calcDirection();
 		
+		players[myId].attr("y",players[myId].attr("y")+changes["y"]*-1);
+		players[myId].attr("x",players[myId].attr("x")+changes["x"]*-1);
 	}
 	updateCrosshairStart();
 
